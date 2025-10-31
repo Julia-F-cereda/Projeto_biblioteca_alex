@@ -48,13 +48,15 @@ class Tabela_gerenciar():
         self.button_inserir.pack(side="left", padx=10, pady=10)
 
         #alterar
-        self.button_alterar = ttk.Button(self.frame_button, text="Alterar")
+        self.button_alterar = ttk.Button(self.frame_button, text="Alterar", command= self.alterar)
         self.button_alterar.pack(side="left", padx=10, pady=10)
 
         #exluir
-        self.button_excluir = ttk.Button(self.frame_button, text="Excluir")
+        self.button_excluir = ttk.Button(self.frame_button, text="Excluir", command=self.excluir)
         self.button_excluir.pack(side="left", padx=10, pady=10)
 
+        self.button_atualizar = ttk.Button(self.frame_button, text="Atualizar alterações", command= self.salvar_alteracao)
+        self.button_atualizar.pack(side="left", padx=10, pady=10)
         #faz com que execute a tabela assim que iniciar o programa
         self.criando_tabela()
 
@@ -128,8 +130,8 @@ class Tabela_gerenciar():
             self.atualizar()
             message.showwarning(message="Informações inseridas com sucesso!")
         except:
-
-            message.showerror(message="Erro ao inserir, favor preencher todos os dados")
+            if self.inserir == None:
+                message.showerror(message="Erro ao inserir, favor preencher todos os dados")
 
 
         finally:
@@ -159,18 +161,86 @@ class Tabela_gerenciar():
 #########################################################################################################3#
 #e
     def excluir(self):
-        
-        self.selecionado = self.titulo.selection()  # pega o índice do item selecionado
-        if self.selecionado:
-            indice = self.selecionado[0]
-            texto = self.titulo.get(indice)
+        selecionado = self.treeview.selection()
+        #selecionando qual vai ser a linha que vai ser excluida
+        if selecionado:
+            indice = selecionado[0]
+            valores = self.treeview.item(indice, "values")
+            self.titulo = valores[0] #o título é a primeira coluna
 
-        conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
-        cursor = conexao.cursor()
-  
-       
+            #conectando sqlite
+            conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
+            cursor = conexao.cursor()
 
+            # Exclui do banco de dados, estou excluindo pela primary key
+            cursor.execute("DELETE FROM biblioteca_jogos WHERE titulo = ?", (self.titulo,))
 
+            conexao.commit()
+            cursor.close()
+            conexao.close()
+
+            # Exclui da Treeview 
+            self.treeview.delete(indice)
+
+        else:
+            message.showerror(message="Selecione o item que quer excluir")
+############################################################################################################
+#def para alterar 
+    def alterar(self):
+        selec_alterar = self.treeview.selection()
+        if selec_alterar:
+            indice = selec_alterar[0]
+            valores = self.treeview.item(indice, "values")
+
+            # guarda o título original (chave primária)
+            self.titulo_original = valores[0]
+
+            # limpa os entrys antes de preencher
+            self.entry_titulo.delete(0, ttk.END)
+            self.entry_plataforma.delete(0, ttk.END)
+            self.entry_genero.delete(0, ttk.END)
+            self.entry_status.delete(0, ttk.END)
+
+            # coloca os valores da linha selecionada nos entrys
+            self.entry_titulo.insert(0, valores[0])
+            self.entry_plataforma.insert(0, valores[1])
+            self.entry_genero.insert(0, valores[2])
+            self.entry_status.insert(0, valores[3])
+        else:
+            message.showerror("Erro", "Selecione um item para alterar.")
+
+#######################################################################################################333
+    def salvar_alteracao(self):
+        try:
+            #pondo as novas alterações
+            novo_titulo = self.entry_titulo.get().strip()
+            nova_plataforma = self.entry_plataforma.get().strip()
+            novo_genero = self.entry_genero.get().strip()
+            novo_status = self.entry_status.get().strip()
+
+            
+
+            conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
+            cursor = conexao.cursor()
+            #pondo as novas alterações
+            cursor.execute("""
+                UPDATE biblioteca_jogos
+                SET titulo = ?, plataforma = ?, genero = ?, status = ?
+                WHERE titulo = ?
+            """, (novo_titulo, nova_plataforma, novo_genero, novo_status, self.titulo_original))
+
+            conexao.commit()
+            cursor.close()
+            conexao.close()
+
+            # Atualiza visualmente a tabela
+            self.atualizar()
+
+            message.showinfo("Sucesso", "Alterações salvas com sucesso!")
+
+        except AttributeError:
+            message.showerror("Erro", "Você precisa primeiro clicar em 'Alterar' para escolher o item a editar.")
+###########################################################################################3######################
 
 
 
