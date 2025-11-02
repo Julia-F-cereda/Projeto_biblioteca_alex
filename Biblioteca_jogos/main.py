@@ -1,7 +1,11 @@
 #importar
+import tkinter as tk
 import ttkbootstrap as ttk
 import sqlite3
 import tkinter.messagebox as message
+#eles nao podem ter o mesmo nome, por isso o meu tava dando erro
+#Constantes (END, LEFT, RIGHT) → tk
+#Widgets → ttkbootstrap se quiser o estilo moderno
 
 
 class Tabela_gerenciar():
@@ -114,10 +118,10 @@ class Tabela_gerenciar():
             self.genero = self.entry_genero.get()
             self.status = self.entry_status.get()
             #limpando as caixas 
-            self.entry_titulo.delete(0,ttk.END)
-            self.entry_plataforma.delete(0,ttk.END)
-            self.entry_genero.delete(0, ttk.END)
-            self.entry_status.delete(0,ttk.END)
+            self.entry_titulo.delete(0,tk.END)
+            self.entry_plataforma.delete(0,tk.END)
+            self.entry_genero.delete(0, tk.END)
+            self.entry_status.delete(0,tk.END)
     
      #banoc de dados
             self.inserir = """
@@ -196,10 +200,10 @@ class Tabela_gerenciar():
             self.titulo_original = valores[0]
 
             # limpa os entrys antes de preencher
-            self.entry_titulo.delete(0, ttk.END)
-            self.entry_plataforma.delete(0, ttk.END)
-            self.entry_genero.delete(0, ttk.END)
-            self.entry_status.delete(0, ttk.END)
+            self.entry_titulo.delete(0, tk.END)
+            self.entry_plataforma.delete(0, tk.END)
+            self.entry_genero.delete(0, tk.END)
+            self.entry_status.delete(0, tk.END)
 
             # coloca os valores da linha selecionada nos entrys
             self.entry_titulo.insert(0, valores[0])
