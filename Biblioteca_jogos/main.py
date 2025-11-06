@@ -10,39 +10,62 @@ import tkinter.messagebox as message
 
 class Tabela_gerenciar():
     def __init__(self):
+        
         #criando a janela
-        self.janela = ttk.Window(themename="vapor")
-
-        self.label_titulo_inicial = ttk.Label(text="Biblioteca de Jogos de Vídeo")
+        self.janela = ttk.Window(themename="superhero")
+    
+        self.label_titulo_inicial = ttk.Label(text="Biblioteca de Jogos de Vídeo", 
+                                              font=("Helvetica", 20, "bold"))
         self.label_titulo_inicial.pack()
+        self.criando_tabela()
+
+        #Criando o notebook(que é o gerenciador das janelas.)
+        self.notebook = ttk.Notebook(self.janela)
+        self.notebook.pack(pady=10, padx=10, expand=True, fill="both")
+        
+        #Cria as abas que eu quero
+        self.aba_jogos = ttk.Frame(self.notebook) #Aba jogos(que é a que esta feita)
+        self.aba_estatisticas = ttk.Frame(self.notebook) #aba "Estatísticas"(do desafio bonus)
+        
+        #Aqui ele vai tonar as abas que eu criei cliaveis. para quando clicar em uma delas a opção mudar
+        self.notebook.add(self.aba_jogos, text='Jogos')
+        self.notebook.add(self.aba_estatisticas, text='Estatísticas')
+        
+        #Monta o layout da aba de esttisticas
+        self.criar_aba_estatisticas(self.aba_estatisticas)
+        
+        #liga um "sensor" para mudar de aba.
+        self.notebook.bind("<<NotebookTabChanged>>", self.on_tab_change)
       
 #############################################################################################################
         #caixas de texto para inserir informações
+        #As informações que vão ficar dentro da aba de jogos tem que adicionar o self.aba_jogos
+        #para que as informações dos jogos fiquem apenas na janela de jogos.
         #titulo
-        self.label_titulo = ttk.Label(text="Titulo")
+        self.label_titulo = ttk.Label(self.aba_jogos, text="Titulo")
         self.label_titulo.pack()
-        self.entry_titulo = ttk.Entry(width=90)
+        self.entry_titulo = ttk.Entry(self.aba_jogos, width=90)
         self.entry_titulo.pack(pady=5)
 
         #plataforma
-        self.label_plataforma = ttk.Label(text="Plataforma")
+        self.label_plataforma = ttk.Label(self.aba_jogos, text="Plataforma")
         self.label_plataforma.pack()
-        self.entry_plataforma = ttk.Entry(width=90)
+        self.entry_plataforma = ttk.Entry(self.aba_jogos, width=90)
         self.entry_plataforma.pack(pady=10)
 
         #genero
-        self.label_genero = ttk.Label(text="Genero")
+        self.label_genero = ttk.Label(self.aba_jogos, text="Genero")
         self.label_genero.pack()
-        self.entry_genero = ttk.Entry(width=90)
+        self.entry_genero = ttk.Entry(self.aba_jogos, width=90)
         self.entry_genero.pack(pady=10)
 
         #status
-        self.label_status = ttk.Label(text="Status")
+        self.label_status = ttk.Label(self.aba_jogos,text="Status")
         self.label_status.pack()
-        self.entry_status = ttk.Entry(width=90)
+        self.entry_status = ttk.Entry(self.aba_jogos,width=90)
         self.entry_status.pack(pady=10)
 
-        self.frame_button = ttk.Frame(self.janela)
+        self.frame_button = ttk.Frame(self.aba_jogos)
         self.frame_button.pack(pady=5)
 
 ##############################################################################################################
@@ -62,12 +85,12 @@ class Tabela_gerenciar():
         self.button_atualizar = ttk.Button(self.frame_button, text="Atualizar alterações", command= self.salvar_alteracao)
         self.button_atualizar.pack(side="left", padx=10, pady=10)
         #faz com que execute a tabela assim que iniciar o programa
-        self.criando_tabela()
+       
 
 
 ###############################################################################################################
         #criando a tabela
-        self.treeview = ttk.Treeview(self.janela)
+        self.treeview = ttk.Treeview(self.aba_jogos)
         self.treeview.pack()
 
         #definir as colunas
@@ -80,7 +103,7 @@ class Tabela_gerenciar():
         self.treeview.heading("status", text="status")
 
         self.atualizar()
-#############################################################################################################
+########################################################################################################################################################
 #começando a inserir banco de dados
     def criando_tabela(self):
         conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
@@ -93,7 +116,7 @@ class Tabela_gerenciar():
                                     titulo varchar(200) primary key, 
                                     plataforma varchar(200),
                                     genero varchar(200),
-                                    status varcha(200) 
+                                    status varchar(200) 
                                     
                                     );
                                     """
@@ -105,7 +128,7 @@ class Tabela_gerenciar():
     #para fechar o cursor
         cursor.close()
         conexao.close()
-##########################################################################################################
+########################################################################################################################################################
 #criando adicionar tarefa
     def adicionar(self):
         try:
@@ -142,7 +165,7 @@ class Tabela_gerenciar():
         #para fechar o cursor
             cursor.close()
             conexao.close()
-#########################################################################################################
+########################################################################################################################################################
     def atualizar(self):
         conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
         cursor = conexao.cursor()
@@ -162,8 +185,7 @@ class Tabela_gerenciar():
         for linha in atualizando:
             self.treeview.insert("", "end", values= linha)
             
-#########################################################################################################3#
-#e
+#######################################################################################################################################################
     def excluir(self):
         selecionado = self.treeview.selection()
         #selecionando qual vai ser a linha que vai ser excluida
@@ -188,7 +210,7 @@ class Tabela_gerenciar():
 
         else:
             message.showerror(message="Selecione o item que quer excluir")
-############################################################################################################
+#######################################################################################################################################################
 #def para alterar 
     def alterar(self):
         selec_alterar = self.treeview.selection()
@@ -213,7 +235,7 @@ class Tabela_gerenciar():
         else:
             message.showerror("Erro", "Selecione um item para alterar.")
 
-#######################################################################################################333
+#######################################################################################################################################################
     def salvar_alteracao(self):
         try:
             #pondo as novas alterações
@@ -244,10 +266,58 @@ class Tabela_gerenciar():
 
         except AttributeError:
             message.showerror("Erro", "Você precisa primeiro clicar em 'Alterar' para escolher o item a editar.")
-###########################################################################################3######################
+#######################################################################################################################################################
+#ESTATISTICAS
+    def criar_aba_estatisticas(self):
+        self.label_contagem = ttk.Label(self.aba_estatisticas, text="")
+        self.label_contagem.pack()
+   
+######################################################################################################################################################
+    def total(self):
+        conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
+        cursor = conexao.cursor()
+
+        cursor.execute("SELECT COUNT(titulo) FROM biblioteca_jogos")
+        qtd = cursor.fetchone()[0]
+        return qtd  # só retorna o número
+    
+########################################################################################################################################################
+
+    def total_jogados(self):
+        conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
+        cursor = conexao.cursor()
+        cursor.execute("SELECT COUNT(titulo) FROM biblioteca_jogos WHERE status='Jogado'")
+        qtd = cursor.fetchone()[0]
+        conexao.close()
+        return qtd
+
+######################################################################################################################################################
+    def atualizar_jogados(self):
+        total = self.total()
+        jogados = self.total_jogados()
+
+        # evita erro de divisão por zero
+        if total > 0:
+            porcentagem = (jogados / total) * 100
+        else:
+            porcentagem = 0
+        self.label_contagem.config(text=f"Total de jogos: {total}\nPorcentagem: {total_jogados:.2f}%")
 
 
+##############################################################################################################
 
+############################################################################################################
+
+
+    def on_tab_change(self, event):
+        aba_selecionada = event.widget.tab('current')['text']
+
+        if aba_selecionada == "Estatísticas":
+            self.atualizar_estatisticas()
+
+        elif aba_selecionada == "Jogos":
+            self.atualizar()
+    #################################################################################################################################################
 
 #rodado a janela 
     def run(self):
