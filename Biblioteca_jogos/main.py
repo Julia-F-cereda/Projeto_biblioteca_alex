@@ -268,56 +268,85 @@ class Tabela_gerenciar():
             message.showerror("Erro", "Você precisa primeiro clicar em 'Alterar' para escolher o item a editar.")
 #######################################################################################################################################################
 #ESTATISTICAS
-    def criar_aba_estatisticas(self):
-        self.label_contagem = ttk.Label(self.aba_estatisticas, text="")
-        self.label_contagem.pack()
-   
+    def criar_aba_estatisticas(self,aba):
+        ttk.Label(self.aba_estatisticas, text="Aba de Estatísticas", 
+                  font=("Helvetica", 16, "bold")).pack(pady=10)
+
+
 ######################################################################################################################################################
     def total(self):
         conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
         cursor = conexao.cursor()
-
+        #count pega a quantidade de valores 
         cursor.execute("SELECT COUNT(titulo) FROM biblioteca_jogos")
-        qtd = cursor.fetchone()[0]
-        return qtd  # só retorna o número
+        self.qtd = cursor.fetchone()[0]
+        return self.qtd
     
-########################################################################################################################################################
-
-    def total_jogados(self):
-        conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
-        cursor = conexao.cursor()
-        cursor.execute("SELECT COUNT(titulo) FROM biblioteca_jogos WHERE status='Jogado'")
-        qtd = cursor.fetchone()[0]
-        conexao.close()
-        return qtd
-
-######################################################################################################################################################
-    def atualizar_jogados(self):
-        total = self.total()
-        jogados = self.total_jogados()
-
-        # evita erro de divisão por zero
-        if total > 0:
-            porcentagem = (jogados / total) * 100
-        else:
-            porcentagem = 0
-        self.label_contagem.config(text=f"Total de jogos: {total}\nPorcentagem: {total_jogados:.2f}%")
-
 
 ##############################################################################################################
 
-############################################################################################################
+    def zerado(self):
+        conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
+        cursor = conexao.cursor()
+        #puis ele aq dnv pq pra ele pegar o total precisa disso
+        cursor.execute("SELECT COUNT(*) FROM biblioteca_jogos")
+        total = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM biblioteca_jogos WHERE status='zerado'")
+        zerados = cursor.fetchone()[0]
+
+        if total == 0:
+            return 0
+        else:
+            self.percentual = (zerados / total) * 100
+            return self.percentual
+##############################################################################################################
+    def comum(self):
+        conexao = sqlite3.connect("Biblioteca_jogos/bd_tabela_jogos.sqlite")
+        cursor = conexao.cursor()
+        #group by, separa as coisas escritas em grupo, por ex: xbox, xbox, ps, 
+        cursor.execute("""
+            SELECT plataforma, COUNT(*) 
+            FROM biblioteca_jogos
+            GROUP BY plataforma
+        """)
+        #fetchall serve para ele enviar em lista
+        self.resultado = cursor.fetchall()
+        return self.resultado
 
 
+#####################################################################################################################
+    def atualizar_estatisticas(self):
+        #apagar a antiga, chikdren pega tudo de uma vez pra apagr
+        for widget in self.aba_estatisticas.winfo_children():
+            widget.destroy()
+
+        #pegar os valores das estatisticas
+        qtd = self.total()
+        percentual = self.zerado()
+        resultado = self.comum()
+
+        #label para ele inserir 
+        self.qnt_label = ttk.Label(self.aba_estatisticas, text=f"Total de jogos:{qtd}", 
+                                   font=("Times New Roman", 20, "bold"))
+        self.qnt_label.pack()
+        self.percentual_label = ttk.Label(self.aba_estatisticas, text=f"Porcentagem zerada:{percentual}%",
+                                          font=("Times New Roman", 20, "bold"))
+        self.percentual_label.pack()
+        self.resultado_label = ttk.Label(self.aba_estatisticas, text=f"Plataformas em comum:{resultado}",
+                                         font=("Times New Roman", 20, "bold"))
+        self.resultado_label.pack()
+
+##################################################################################################################
     def on_tab_change(self, event):
         aba_selecionada = event.widget.tab('current')['text']
 
         if aba_selecionada == "Estatísticas":
             self.atualizar_estatisticas()
-
         elif aba_selecionada == "Jogos":
             self.atualizar()
-    #################################################################################################################################################
+
+#################################################################################################################################################
 
 #rodado a janela 
     def run(self):
