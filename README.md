@@ -3,7 +3,7 @@
 
 <h3>STATUS</h3>
 <p>
-<img loading="lazy" src="http://img.shields.io/static/v1?label=STATUS&message=%2FINALIZADP&color=GREEN&style=for-the-badge"/>
+<img loading="lazy" src="http://img.shields.io/static/v1?label=STATUS&message=%2FINALIZADO&color=GREEN&style=for-the-badge"/>
 </p>
 
 <h3>DESCRIÇÃO DO PROJETO</h3>
